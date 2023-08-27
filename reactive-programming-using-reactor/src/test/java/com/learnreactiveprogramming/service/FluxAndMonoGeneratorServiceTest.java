@@ -2,498 +2,154 @@ package com.learnreactiveprogramming.service;
 
 import org.junit.jupiter.api.Test;
 import reactor.test.StepVerifier;
-import reactor.test.scheduler.VirtualTimeScheduler;
 
-import java.time.Duration;
 import java.util.List;
 
 class FluxAndMonoGeneratorServiceTest {
-
-    FluxAndMonoGeneratorService fluxAndMonoGeneratorService = new FluxAndMonoGeneratorService();
+    FluxAndMonoGeneratorService service = new FluxAndMonoGeneratorService();
+    MyFluxAndMonoSample sample = new MyFluxAndMonoSample();
 
     @Test
-    void namesFlux() {
+    public void testFlux1() {
+        // Given
 
-        //given
+        // When: Get the flux publisher
+        var nameFlux1 = service.namesFlux();
 
-        //when
-        var stringFlux = fluxAndMonoGeneratorService.namesFlux();
-
-        //then
-        StepVerifier.create(stringFlux)
-                //.expectNext("alex", "ben", "chloe")
-                //.expectNextCount(3)
-                .expectNext("alex")
-                .expectNextCount(2)
+        // Then
+        StepVerifier.create(nameFlux1)
+                .expectNext("alex", "ben", "chloe")
                 .verifyComplete();
 
+        // When
+        var nameFlux2 = service.namesFlux();
+
+        // Then: Verify some count ?
+        StepVerifier.create(nameFlux2).expectNext("alex").expectNextCount(2).verifyComplete();
     }
 
     @Test
-    void namesFlux_Immutability() {
+    public void testFlux_immutability() {
+        var flux = sample.myIntFlux2();
 
-        //given
-
-        //when
-        var stringFlux = fluxAndMonoGeneratorService.namesFlux_immutablity()
-                .log();
-
-        //then
-        StepVerifier.create(stringFlux)
-                //.expectNext("ALEX", "BEN", "CHLOE")
-                .expectNextCount(3)
-                .verifyComplete();
-
-
+        StepVerifier.create(flux).expectNext(1, 2, 3).verifyComplete();
     }
 
     @Test
-    void namesMono() {
+    public void testFlux_flatten() {
+        var flux = sample.myFirstFlattenNamesFlux2();
 
-        //given
-        //when
-        var stringMono = fluxAndMonoGeneratorService.namesMono();
-
-        //then
-        StepVerifier.create(stringMono)
-                .expectNext("alex")
-                .verifyComplete();
-
-    }
-
-    @Test
-    void namesMono_map_filter() {
-
-        //given
-        int stringLength = 3;
-
-        //when
-        var stringMono = fluxAndMonoGeneratorService.namesMono_map_filter(stringLength);
-
-        //then
-        StepVerifier.create(stringMono)
-                .expectNext("ALEX")
-                .verifyComplete();
-
-    }
-
-    @Test
-    void namesMono_map_empty() {
-
-        //given
-        int stringLength = 4;
-
-        //when
-        var stringMono = fluxAndMonoGeneratorService.namesMono_map_filter(stringLength);
-
-        //then
-        StepVerifier.create(stringMono)
-                .expectNext("default")
-                .verifyComplete();
-
-    }
-
-
-    @Test
-    void namesFlux_map() {
-
-        //given
-        int stringLength = 3;
-
-        //when
-        var namesFlux = fluxAndMonoGeneratorService.namesFlux_map(stringLength).log();
-
-        //then
-        StepVerifier.create(namesFlux)
-                //.expectNext("ALEX", "BEN", "CHLOE")
-                .expectNext("4-ALEX", "5-CHLOE")
-                .verifyComplete();
-
-    }
-
-    @Test
-    void namesFlux_flatmap() {
-
-        //given
-        int stringLength = 3;
-
-        //when
-        var namesFlux = fluxAndMonoGeneratorService.namesFlux_flatmap(stringLength).log();
-
-        //then
-        StepVerifier.create(namesFlux)
-                .expectNext("A", "L", "E", "X", "C", "H", "L", "O", "E")
-                .verifyComplete();
-
-    }
-
-    @Test
-    void namesFlux_flatmap_async() {
-
-        //given
-        int stringLength = 3;
-
-        //when
-        var namesFlux = fluxAndMonoGeneratorService.namesFlux_flatmap_async(stringLength).log();
-
-        //then
-        StepVerifier.create(namesFlux)
-                /*.expectNext("0-A", "1-L", "2-E", "3-X")
-                .expectNextCount(5)*/
-                .expectNextCount(9)
-                .verifyComplete();
-
-    }
-
-    @Test
-    void namesFlux_concatMap() {
-
-        //given
-        int stringLength = 3;
-
-        //when
-        var namesFlux = fluxAndMonoGeneratorService.namesFlux_concatmap(stringLength).log();
-
-        //then
-        StepVerifier.create(namesFlux)
-                .expectNext("A", "L", "E", "X")
-                //expectNext("0-A", "1-L", "2-E", "3-X")
-                .expectNextCount(5)
-                .verifyComplete();
-
-    }
-
-    @Test
-    void namesFlux_concatmap_withVirtualTime() {
-        //given
-        VirtualTimeScheduler.getOrSet();
-        int stringLength = 3;
-
-        //when
-        var namesFlux = fluxAndMonoGeneratorService.namesFlux_concatmap(stringLength);
-
-        //then
-        StepVerifier.withVirtualTime(()-> namesFlux)
-                .thenAwait(Duration.ofSeconds(10))
-                .expectNext("A","L","E","X","C","H","L","O","E")
-                //.expectNextCount(9)
+        // Expect
+        StepVerifier.create(flux)
+                .expectNext("a", "l")
+                .expectNextCount(10)
                 .verifyComplete();
     }
 
     @Test
-    void namesMono_flatmap() {
+    public void testFlux_flatten_async() {
+        var flux = sample.myFirstFlattenNamesFluxAsync();
 
-        //given
-        int stringLength = 3;
+        // Free-test
+//        flux.subscribe(System.out::println);
 
-        //when
-        var namesFlux = fluxAndMonoGeneratorService.namesMono_flatmap(stringLength).log();
-
-        //then
-        StepVerifier.create(namesFlux)
-                .expectNext(List.of("A", "L", "E", "X"))
+        // Expect
+        StepVerifier.create(flux)
+                .expectNext("a", "l")
+                .expectNextCount(10)
                 .verifyComplete();
-
     }
 
     @Test
-    void namesMono_flatmapMany() {
+    public void testFlux_concat_map() {
+        var flux = sample.myFirstConcatMapNamesFlux();
 
-        //given
-        int stringLength = 3;
+        // Free-test
+//        flux.subscribe(System.out::println);
 
-        //when
-        var namesFlux = fluxAndMonoGeneratorService.namesMono_flatmapMany(stringLength).log();
-
-        //then
-        StepVerifier.create(namesFlux)
-                .expectNext("A", "L", "E", "X")
+        // Expect
+        StepVerifier.create(flux)
+                .expectNext("a", "l")
+                .expectNextCount(10)
                 .verifyComplete();
-
-    }
-
-
-    @Test
-    void namesFlux_transform() {
-
-        //given
-        int stringLength = 3;
-
-        //when
-        var namesFlux = fluxAndMonoGeneratorService.namesFlux_transform(stringLength).log();
-
-        //then
-        StepVerifier.create(namesFlux)
-                .expectNext("A", "L", "E", "X")
-                .expectNextCount(5)
-                .verifyComplete();
-
     }
 
     @Test
-    void namesFlux_transform_1() {
+    public void testMono_flatMap() {
+        var mono = sample.myFirstMonoFlatMap();
 
-        //given
-        int stringLength = 6;
+        // Free-test
+//        flux.subscribe(System.out::println);
 
-        //when
-        var namesFlux = fluxAndMonoGeneratorService.namesFlux_transform(stringLength).log();
-
-        //then
-        StepVerifier.create(namesFlux)
-                .expectNext("default")
-                //.expectNextCount(5)
+        // Expect
+        StepVerifier.create(mono)
+                .expectNext(List.of("a", "l", "e", "x"))
                 .verifyComplete();
-
     }
 
     @Test
-    void namesFlux_transform_switchIfEmpty() {
+    public void testMono_flatMapMany() {
+        var flux = sample.myFirstTransformedFlux();
 
-        //given
-        int stringLength = 6;
+        // Free-test
+//        flux.subscribe(System.out::println);
 
-        //when
-        var namesFlux = fluxAndMonoGeneratorService.namesFlux_transform_switchIfEmpty(stringLength).log();
-
-        //then
-        StepVerifier.create(namesFlux)
-                .expectNext("D", "E", "F", "A", "U", "L", "T")
-                //.expectNextCount(5)
+        // Expect
+        StepVerifier.create(flux)
+                .expectNext("a", "c", "e")
                 .verifyComplete();
-
     }
 
     @Test
-    void namesFlux_transform_concatwith() {
+    public void testFlux_concatenatedFlux() {
+        var flux = sample.myFirstConcatFlux();
 
-        //given
-        int stringLength = 3;
+        // Free-test
+//        flux.subscribe(System.out::println);
 
-        //when
-        var namesFlux = fluxAndMonoGeneratorService.namesFlux_transform_concatwith(stringLength).log();
-
-        //then
-        StepVerifier.create(namesFlux)
-                //.expectNext("ALEX", "BEN", "CHLOE")
-                .expectNext("4-ALEX", "5-CHLOE", "4-ANNA")
+        // Expect
+        StepVerifier.create(flux)
+                .expectNext(1, 3, 5, 7, 2, 4, 6, 8)
                 .verifyComplete();
-
     }
 
     @Test
-    void name_defaultIfEmpty() {
+    public void testFlux_mergedFlux() {
+        var flux = sample.myFirstMergeFlux();
 
-        //given
+        // Free-test
+        flux.subscribe(System.out::println);
 
-        //when
-        var value = fluxAndMonoGeneratorService.name_defaultIfEmpty();
+        // Must wait here to complete emitting elements
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
 
-        //then
-        StepVerifier.create(value)
-                .expectNext("Default")
-                .verifyComplete();
-
+//        // Expect
+//        StepVerifier.create(flux)
+//                .expectNext(1, 3, 5, 7, 2, 4, 6, 8)
+//                .verifyComplete();
     }
 
     @Test
-    void name_switchIfEmpty() {
+    public void testFlux_mergedSequentiallyFlux() {
+        var flux = sample.myFirstMergeSequentialFlux();
 
-        //given
+        // Free-test
+        flux.subscribe(System.out::println);
 
-        //when
-        var value = fluxAndMonoGeneratorService.name_switchIfEmpty();
+        // Must wait here to complete emitting elements
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
 
-        //then
-        StepVerifier.create(value)
-                .expectNext("Default")
-                .verifyComplete();
-
+//        // Expect
+//        StepVerifier.create(flux)
+//                .expectNext(1, 3, 5, 7, 2, 4, 6, 8)
+//                .verifyComplete();
     }
-
-    @Test
-    void explore_concat() {
-
-        //given
-
-        //when
-        var value = fluxAndMonoGeneratorService.explore_concat();
-
-        //then
-        StepVerifier.create(value)
-                .expectNext("A", "B", "C", "D", "E", "F")
-                .verifyComplete();
-
-    }
-
-
-    @Test
-    void explore_concatWith() {
-
-        //given
-
-        //when
-        var value = fluxAndMonoGeneratorService.explore_concatWith();
-
-        //then
-        StepVerifier.create(value)
-                .expectNext("A", "B", "C", "D", "E", "F")
-                .verifyComplete();
-
-    }
-
-    @Test
-    void explore_concat_mono() {
-
-        //given
-
-        //when
-        var value = fluxAndMonoGeneratorService.explore_concatWith_mono();
-
-        //then
-        StepVerifier.create(value)
-                .expectNext("A", "B")
-                .verifyComplete();
-
-    }
-
-    @Test
-    void explore_merge() {
-
-        //given
-
-        //when
-        var value = fluxAndMonoGeneratorService.explore_merge();
-
-        //then
-        StepVerifier.create(value)
-                // .expectNext("A", "B", "C", "D", "E", "F")
-                .expectNext("A", "D", "B", "E", "C", "F")
-                .verifyComplete();
-
-    }
-
-    @Test
-    void explore_mergeWith() {
-
-        //given
-
-        //when
-        var value = fluxAndMonoGeneratorService.explore_mergeWith();
-
-        //then
-        StepVerifier.create(value)
-
-                .expectNext("A", "D", "B", "E", "C", "F")
-                .verifyComplete();
-
-    }
-
-    @Test
-    void explore_mergeWith_mono() {
-
-        //given
-
-        //when
-        var value = fluxAndMonoGeneratorService.explore_mergeWith_mono();
-
-        //then
-        StepVerifier.create(value)
-
-                .expectNext("A", "B")
-                .verifyComplete();
-
-    }
-
-    @Test
-    void explore_mergeSequential() {
-
-        //given
-
-        //when
-        var value = fluxAndMonoGeneratorService.explore_mergeSequential();
-
-        //then
-        StepVerifier.create(value)
-                .expectNext("A", "B", "C", "D", "E", "F")
-                .verifyComplete();
-
-    }
-
-    @Test
-    void explore_zip() {
-
-        //given
-
-        //when
-        var value = fluxAndMonoGeneratorService.explore_zip().log();
-
-        //then
-        StepVerifier.create(value)
-                .expectNext("AD", "BE", "CF")
-                .verifyComplete();
-
-    }
-
-    @Test
-    void explore_zip_1() {
-
-        //given
-
-        //when
-        var value = fluxAndMonoGeneratorService.explore_zip_1().log();
-
-        //then
-        StepVerifier.create(value)
-                .expectNext("AD14", "BE25", "CF36")
-                .verifyComplete();
-
-    }
-
-
-    @Test
-    void explore_zip_2() {
-
-        //given
-
-        //when
-        var value = fluxAndMonoGeneratorService.explore_zip_2().log();
-
-        //then
-        StepVerifier.create(value)
-                .expectNext("AB")
-                .verifyComplete();
-
-    }
-
-    @Test
-    void explore_zipWith() {
-
-        //given
-
-        //when
-        var value = fluxAndMonoGeneratorService.explore_zipWith().log();
-
-        //then
-        StepVerifier.create(value)
-                .expectNext("AD", "BE", "CF")
-                .verifyComplete();
-
-    }
-
-    @Test
-    void explore_zipWith_mono() {
-
-        //given
-
-        //when
-        var value = fluxAndMonoGeneratorService.explore_zipWith_mono().log();
-
-        //then
-        StepVerifier.create(value)
-                .expectNext("AB")
-                .verifyComplete();
-
-    }
-
 }
