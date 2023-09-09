@@ -1,0 +1,21 @@
+FROM openjdk:11
+
+ARG PROJECT_DIR
+
+RUN apt-get update & \
+    apt-get clean
+
+# Does not work on mac, and no actual effect on cloud so skip
+#RUN addgroup --gid $GRP_ID $USER
+#
+#RUN adduser --gid $GRP_ID --uid $USER_ID --disabled-password --gecos ""  $USER && \
+#    echo '$USER ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+
+#USER ${USER}
+
+ADD movies-info-service $PROJECT_DIR/movies-info-service
+WORKDIR $PROJECT_DIR/movies-info-service
+
+RUN ./gradlew -i clean build  -x test
+
+ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=containerized", "./build/libs/movies-info-service-0.0.1-SNAPSHOT.jar"]

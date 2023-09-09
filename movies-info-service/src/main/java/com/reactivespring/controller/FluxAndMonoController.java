@@ -15,7 +15,7 @@ public class FluxAndMonoController {
     @GetMapping("/flux")
     public Flux<Integer> getFlux() {
         // But this method still returns all data at once ?
-        return Flux.just(1, 2, 3).delayElements(Duration.ofMillis(1000)).log();
+        return Flux.just(1, 2, 3, 4, 5).delayElements(Duration.ofMillis(1000)).log();
     }
 
     @GetMapping("/mono")

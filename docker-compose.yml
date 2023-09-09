@@ -1,0 +1,41 @@
+version: "3.0"
+services:
+  movies-info:
+    build:
+      context: .
+      dockerfile: Dockerfile_movies_info
+      args:
+        PROJECT_DIR: /mnt/project/movie-info
+    volumes:
+      - "vlm_movie_info:/mnt/project/movie-info"
+    ports:
+      - "8089:8089"
+    networks:
+      - "movies-net"
+    depends_on:
+      - movies-db
+
+  movies-db:
+    image: mongo:5.0.6
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: 12345678
+    volumes:
+      - "vlm_mongo_data:/data/db"
+      - "./movies-db/mongod.conf:/etc/mongo/mongod.conf:ro"
+      - "vlm_mongo_log:/var/log/mongodb"
+    command: ["mongod", "--config", "/etc/mongo/mongod.conf"]
+    ports:
+      - "27017:27017"
+    restart: always
+    networks:
+      - "movies-net"
+
+volumes:
+  vlm_mongo_data:
+  vlm_mongo_log:
+  vlm_movie_info:
+
+networks:
+  movies-net:
+
