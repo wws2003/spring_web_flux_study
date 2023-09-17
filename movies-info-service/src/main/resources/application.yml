@@ -4,6 +4,10 @@ server:
 spring:
   data:
     mongodb:
-      host: localhost
-      port: 27016
-      database: local_movie_db_dev
+#      host: localhost
+#      port: 27016
+      uri: mongodb://movie_db_user:123@localhost:27016/movie_db?authSource=admin
+#      database: movie_db
+#      authentication-database: admin
+#      username: movie_db_user
+#      password: 123
